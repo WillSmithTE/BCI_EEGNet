@@ -1,6 +1,6 @@
 close all; clear all; clc
 
-load 'Subject_B_test.mat' % load data file
+load 'Subject_B_Test.mat' % load data file
  
 % % convert to double precision
  Signal=double(Signal);
@@ -35,4 +35,4 @@ end
  StimulusCode=double(StimulusCode);
 % StimulusType=double(StimulusType);
 
-save Subject_B_test_filtered.mat Signal Flashing StimulusCode % Stimulus Type Target_Char
+save Subject_B_Test_Filtered.mat Signal Flashing StimulusCode % Stimulus Type Target_Char
