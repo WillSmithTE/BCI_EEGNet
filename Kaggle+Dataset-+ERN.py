@@ -48,12 +48,9 @@ for i in l:
 # In[ ]:
 
 
-fb1 = []
 samples = []
 for filename in filenames:
-    print(np.shape(samples))
     lis = []
-    print(filename)
     with open(filename,'r') as f:
         reader = csv.reader(f)
         i = 0
@@ -66,38 +63,29 @@ for filename in filenames:
     b = a.astype(np.float)
     #type(b[9599][58])
 
-    c = 0
     for i in range(1,b.shape[0]):
         if int(b[i][58]) == 1:
             samples.append(b[i:i+260,1:59])
-            c += 1
-#             print(np.array(samples).shape)
-            #print(i," ",i/200)
-            fb1.append(i)
 
 
 # In[ ]:
 
 
-print(np.shape(samples))
 goodSamples = samples.copy()
-print(np.shape(goodSamples))
 
 
 # In[ ]:
 
 
-print(np.shape(goodSamples))
 samples = goodSamples.copy()
 badSampleIndexes = []
 for index, thing in enumerate(samples):
     shape = np.shape(thing)
     if not shape == (260, 58):
-        print(shape)
+        print('Bad shape: ' + shape)
         badSampleIndexes.append(index)
         
 for index in sorted(badSampleIndexes, reverse=True):
-    print(np.shape(samples[index]))
     samples.pop(index)
 
 
@@ -110,13 +98,8 @@ print(np.shape(samples))
 # In[ ]:
 
 
-lenFilenames = len(filenames)
-print(lenFilenames)
-len80PercentFilenames = round(lenFilenames*.8)
-print(len80PercentFilenames)
-for i in range(65, 80):
+for i in range(65, 79):
     lis = []
-    print(i)
     with open(filenames[i],'r') as f:
         reader = csv.reader(f)
         i = 0
@@ -129,28 +112,13 @@ for i in range(65, 80):
     a = np.array(lis)
     b = a.astype(np.float)
     
-    print("a")
-    print(a)
-    
-    print("b")
-    print(b)
-
     #type(b[9599][58])
 
     c = 0
-    print(np.shape(samples))
     for i in range(1,b.shape[0]):
         if int(b[i][58]) == 1:
-            print("in here")
-            derp = b[i:i+260,1:59];
-            print(np.shape(derp))
-            print(derp)
             samples.append(b[i:i+260,1:59])
-            print(np.shape(samples))
             c += 1
-            #print(np.array(samples).shape)
-            #print(i," ",i/200)
-            fb1.append(i)
 
     #s.shape
     
@@ -159,25 +127,12 @@ for i in range(65, 80):
 # In[ ]:
 
 
-print(np.shape(samples))
 samples = np.array(samples)
 
 
 # In[ ]:
 
 
-print(labels.shape)
-
-print(np.shape((samples)))
-print(type(samples))
-print(np.shape((samples[0])))
-print(type((samples[0])))
-
-print(np.shape((samples[0][0])))
-print(type((samples[0][0])))
-
-print(samples[:2000][:][:])
-print(type(samples))
 train_samples = samples[:2000,:,:]
 val_samples = samples[2000:,:,:]
 train_labels = labels[:2000]
@@ -269,9 +224,6 @@ X_val = X_val[:,:,:,:56]
 # In[ ]:
 
 
-print(X_train.shape)
-print(X_val.shape)
-
 
 # In[ ]:
 
@@ -324,7 +276,6 @@ class EEGNet(nn.Module):
         x = self.batchnorm3(x)
         x = F.dropout(x, 0.25)
         x = self.pooling3(x)
-        print (x.size())
         # FC Layer
         x = x.view(-1, 4*2*16)
         x = F.sigmoid(self.fc1(x))
@@ -459,8 +410,8 @@ def valid(net,epoch):
 batch_size = 2
 running_loss_array=[]
 
-for epoch in range(10):  # loop over the dataset multiple times
-    
+for epoch in range(50):  # loop over the dataset multiple times
+     
     print ("\nEpoch ", epoch)
    # print ('range',int(len(X_train)/batch_size-1))
     train_loss=train(epoch)
@@ -481,7 +432,5 @@ plt.show()
 
 
 # In[ ]:
-
-
 
 
