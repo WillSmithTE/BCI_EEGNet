@@ -3,6 +3,18 @@
 
 # In[1]:
 
+import pickle
+
+def save(data, filename):
+    file = open(filename, 'ab')
+    pickle.dump(data, file)
+    file.close()
+
+def read(filename):
+    file = open(filename, 'rb')      
+    data = pickle.load(file) 
+    file.close()
+    return data
 
 import csv
 import numpy as np
@@ -47,7 +59,7 @@ for i in l:
 
 # In[ ]:
 
-
+allSamples = []
 samples = []
 for filename in filenames:
     lis = []
@@ -63,17 +75,20 @@ for filename in filenames:
     b = a.astype(np.float)
     #type(b[9599][58])
 
+    print('b - ', b.shape)
+
     for i in range(1,b.shape[0]):
+        allSamples.append(b[i:i+260,1:59])
         if int(b[i][58]) == 1:
             samples.append(b[i:i+260,1:59])
 
 
 # In[ ]:
 
-
+print('allSamples - ', np.array(allSamples).shape)
 goodSamples = samples.copy()
 
-
+raise Exception('done')
 # In[ ]:
 
 
@@ -98,7 +113,7 @@ print(np.shape(samples))
 # In[ ]:
 
 
-for i in range(65, 79):
+for i in range(0, 79):
     lis = []
     with open(filenames[i],'r') as f:
         reader = csv.reader(f)
@@ -114,29 +129,29 @@ for i in range(65, 79):
     
     #type(b[9599][58])
 
-    c = 0
     for i in range(1,b.shape[0]):
         if int(b[i][58]) == 1:
             samples.append(b[i:i+260,1:59])
-            c += 1
 
     #s.shape
     
 
 
 # In[ ]:
+import pickle
+file1 = open('samples1', 'ab')
+pickle.dump(samples, file1)
+file1.close()
 
-
-samples = np.array(samples)
-
+npSamples = np.array(samples)
 
 # In[ ]:
 
-
-train_samples = samples[:2000,:,:]
-val_samples = samples[2000:,:,:]
-train_labels = labels[:2000]
-val_labels = labels[2000:2480]
+num_to_train = 7000
+train_samples = npSamples[:num_to_train,:,:]
+val_samples = npSamples[num_to_train:,:,:]
+train_labels = labels[:num_to_train]
+val_labels = labels[num_to_train:]
 
 print("train_samples.shape",train_samples.shape)
 
@@ -410,7 +425,7 @@ def valid(net,epoch):
 batch_size = 2
 running_loss_array=[]
 
-for epoch in range(50):  # loop over the dataset multiple times
+for epoch in range(20):  # loop over the dataset multiple times
      
     print ("\nEpoch ", epoch)
    # print ('range',int(len(X_train)/batch_size-1))
