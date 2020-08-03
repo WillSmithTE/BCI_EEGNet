@@ -3,6 +3,9 @@
 
 # In[1]:
 
+LABELS_FILE = 'trainLabels.pickle'
+FILES_NAMES_FILE = 'filenames.pickle'
+
 import pickle
 
 def save(data, filename):
@@ -11,10 +14,13 @@ def save(data, filename):
     file.close()
 
 def read(filename):
-    file = open(filename, 'rb')      
-    data = pickle.load(file) 
-    file.close()
-    return data
+    try:
+        file = open(filename, 'rb')      
+        data = pickle.load(file) 
+        file.close()
+        return data
+    except:
+        return None
 
 import csv
 import numpy as np
@@ -23,135 +29,120 @@ import numpy as np
 # In[2]:
 
 
-labels = []
-with open('TrainLabels.csv', 'r') as f:
-    reader = csv.reader(f)
-    i = 0
-    for row in reader:
-        if(i>0):
-            labels.append(row)
-        i = i + 1
+labels = read(LABELS_FILE)
+
+if (labels is None):
+    labels = []
+    with open('TrainLabels.csv', 'r') as f:
+        reader = csv.reader(f)
+        i = 0
+        for row in reader:
+            if(i>0):
+                labels.append(row)
+            i = i + 1
 
 
-# In[3]:
+    # In[3]:
 
-
-labels = np.array(labels)[:,1]
-labels = labels.reshape(labels.shape[0],1)
-
+    save(labels, LABELS_FILE)
 
 # In[4]:
 
+filenames = read(FILES_NAMES_FILE)
 
-l = [2,6,7,11,12,13,14,16,17,18,20,21,22,23,24,26]
-l2 = [1,2,3,4,5]
-filenames = []
-for i in l:
-    for j in l2:
-        if i>9:
-            if(i == 22 and j == 5):
-                print("Skipped error file " + "ERNData/Training/Data_S"+ str(i)+"_Sess0"+str(j)+".csv" )
+if (filenames is None):
+    l = [2,6,7,11,12,13,14,16,17,18,20,21,22,23,24,26]
+    l2 = [1,2,3,4,5]
+    filenames = []
+    for i in l:
+        for j in l2:
+            if i>9:
+                if(i == 22 and j == 5):
+                    print("Skipped error file " + "ERNData/Training/Data_S"+ str(i)+"_Sess0"+str(j)+".csv" )
+                else:
+                    filenames.append("ERNData/Training/Data_S"+ str(i)+"_Sess0"+str(j)+".csv")
             else:
-                filenames.append("ERNData/Training/Data_S"+ str(i)+"_Sess0"+str(j)+".csv")
-        else:
-            filenames.append("ERNData/Training/Data_S0"+ str(i)+"_Sess0"+str(j)+".csv")
-
+                filenames.append("ERNData/Training/Data_S0"+ str(i)+"_Sess0"+str(j)+".csv")
+    save(filenames, FILES_NAMES_FILE)
 
 # In[ ]:
 
-allSamples = []
-samples = []
-for filename in filenames:
-    lis = []
-    with open(filename,'r') as f:
-        reader = csv.reader(f)
-        i = 0
-        for row in reader:
-            if (i>0):
-                lis.append(row)
-            i = i + 1
+TAKE = 260
 
-    a = np.array(lis)
-    b = a.astype(np.float)
-    #type(b[9599][58])
+samples = read('samples.pickle')
+if (samples is None):
+    samples = []
+    for filename in filenames:
+        lis = []
+        with open(filename,'r') as f:
+            reader = csv.reader(f)
+            i = 0
+            for row in reader:
+                if (i>0):
+                    lis.append(row)
+                i = i + 1
 
-    print('b - ', b.shape)
+        a = np.array(lis)
+        b = a.astype(np.float)
+        #type(b[9599][58])
 
-    for i in range(1,b.shape[0]):
-        allSamples.append(b[i:i+260,1:59])
-        if int(b[i][58]) == 1:
-            samples.append(b[i:i+260,1:59])
+        for i in range(1,b.shape[0]):
+            if int(b[i][58]) == 1:
+                samples.append(b[i:i+TAKE,1:59])
 
-
-# In[ ]:
-
-print('allSamples - ', np.array(allSamples).shape)
-goodSamples = samples.copy()
-
-raise Exception('done')
-# In[ ]:
-
-
-samples = goodSamples.copy()
-badSampleIndexes = []
-for index, thing in enumerate(samples):
-    shape = np.shape(thing)
-    if not shape == (260, 58):
-        print('Bad shape: ' + shape)
-        badSampleIndexes.append(index)
-        
-for index in sorted(badSampleIndexes, reverse=True):
-    samples.pop(index)
-
-
-# In[ ]:
-
-
-print(np.shape(samples))
-
-
-# In[ ]:
-
-
-for i in range(0, 79):
-    lis = []
-    with open(filenames[i],'r') as f:
-        reader = csv.reader(f)
-        i = 0
-        for row in reader:
-            if (i>0):
-                lis.append(row)
-            i = i + 1
-
-
-    a = np.array(lis)
-    b = a.astype(np.float)
     
-    #type(b[9599][58])
 
-    for i in range(1,b.shape[0]):
-        if int(b[i][58]) == 1:
-            samples.append(b[i:i+260,1:59])
+    badSampleIndexes = []
+    for index, thing in enumerate(samples):
+        shape = np.shape(thing)
+        if not shape == (TAKE, 58):
+            print('Bad shape: ', shape)
+            badSampleIndexes.append(index)
 
-    #s.shape
+    for index in sorted(badSampleIndexes, reverse=True):
+        samples.pop(index)
+        labels.pop(index)
+
+    save(samples, 'samples.pickle')
+
+
+# for i in range(65,80):
+#     lis = []
+#     with open(filenames[i],'r') as f:
+#         reader = csv.reader(f)
+#         i = 0
+#         for row in reader:
+#             if (i>0):
+#                 lis.append(row)
+#             i = i + 1
+
+
+#     a = np.array(lis)
+#     b = a.astype(np.float)
+    
+#     #type(b[9599][58])
+
+#     for i in range(1,b.shape[0]):
+#         if int(b[i][58]) == 1:
+#             samples.append(b[i:i+260,1:59])
+
+#     #s.shape
     
 
 
 # In[ ]:
-import pickle
-file1 = open('samples1', 'ab')
-pickle.dump(samples, file1)
-file1.close()
-
 npSamples = np.array(samples)
 
 # In[ ]:
 
-num_to_train = 7000
+labels = np.array(labels)[:,1]
+labels = labels.reshape(labels.shape[0],1)
+
+num_to_train = 4000
 train_samples = npSamples[:num_to_train,:,:]
 val_samples = npSamples[num_to_train:,:,:]
-train_labels = labels[:num_to_train]
-val_labels = labels[num_to_train:]
+train_labels = labels[:num_to_train,:]
+val_labels = labels[num_to_train:,:]
 
 print("train_samples.shape",train_samples.shape)
 
@@ -160,19 +151,6 @@ print("train_labels.shape",train_labels.shape)
 print("val_samples.shape",val_samples.shape)
 
 print("val_labels.shape",val_labels.shape)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
 
 # In[ ]:
 
@@ -226,7 +204,7 @@ print (y_val.shape)
 # In[ ]:
 
 
-X_val = X_val[:480]
+# X_val = X_val[:480]
 
 
 # In[ ]:
