@@ -67,7 +67,7 @@ if (filenames is None):
 
 # In[ ]:
 
-TAKE = 260
+TAKE = 780
 
 samples = read('samples.pickle')
 if (samples is None):
