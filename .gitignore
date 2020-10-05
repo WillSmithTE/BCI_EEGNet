@@ -1,3 +1,4 @@
 ERNData/
 *\.mat
 *.pickle
+.idea
